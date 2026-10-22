@@ -15,6 +15,7 @@ const MUTANTS = [
   ['time not sent', 'KEY_ENDPOINT + encodeURIComponent(String(time))', "KEY_ENDPOINT + '0'"],
   ['accept duplicates', 'databaseEntries.length > 1 || encryptionEntries.length > 1', 'false'],
   ['no truncation check', 'if (end > blob.size) throw truncated(offset);', ''],
+  ['ignore cancellation', "if (signal && signal.aborted) throw new UnlockError('CANCELLED', '작업을 취소했어요.');", ''],
 ];
 
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'rbu-mutants-'));

@@ -29,13 +29,17 @@
 <body>
 <main>
   <h1>🧁 웹리스 백업 풀기 <span class="muted">v__RBU_VERSION__</span></h1>
-  <p>risuai.xyz(웹리스)의 <b>설정 → 계정 &amp; 파일 → 로컬 백업 저장</b>으로 받은 <b>전체 백업(.bin)</b>은 v2026.10.210부터 항상 암호화돼서,
+  <p>risuai.xyz(웹리스)의 <b>설정 → 계정 &amp; 파일 → 로컬 백업 저장</b>으로 받은 <b>전체 백업(.bin)</b>은
+    (로그인 상태면 6월부터, v2026.10.210부터는 항상) 암호화돼서,
     로컬리스·노드리스·포크 리스에서 불러오지 못해요. 이 도구는 <b>risuai.xyz 페이지 안에서</b> 그 백업의 키를 받아
     데이터베이스를 풀고, 어느 리스에서나 불러올 수 있는 일반 백업으로 다시 저장해 줘요.</p>
   <p class="muted">원본 파일은 바뀌지 않아요. 파일 내용은 브라우저 밖으로 나가지 않고, 키 서버에는 리스 자신과 똑같이
     백업 시각만 보내요. 키 서버는 risuai.xyz에서 온 요청만 받기 때문에 꼭 risuai.xyz 탭에서 실행해야 해요.</p>
 
-  <h2>1. PC (크롬·엣지·파이어폭스) — 북마클릿</h2>
+  <p class="muted"><b>PC 권장:</b> 데이터베이스를 푸는 동안 DB 크기의 약 3.5~4배 메모리를 써요(400 MB DB → 탭 약 1.7 GB).
+    데스크톱 앱으로 옮길 거라면 PC에서 바로 하는 게 파일 옮기기도 간단해요. 저장이 끝날 때까지 원본 파일은 옮기거나 지우지 마세요.</p>
+
+  <h2>1. PC (크롬·엣지에서 확인) — 북마클릿</h2>
   <ol>
     <li>북마크바를 켜고(<code>Ctrl+Shift+B</code>) 아래 버튼을 북마크바로 끌어다 놓아요.</li>
     <li>risuai.xyz 탭에서 그 북마크를 눌러요. 오른쪽 위에 패널이 떠요.</li>
@@ -43,8 +47,10 @@
     <li>옮길 리스에서 <b>설정 → 계정 &amp; 파일 → 로컬 백업 불러오기</b>로 <code>…-unlocked.bin</code>을 열어요.</li>
   </ol>
   <p><a class="bookmarklet" href="__RBU_BOOKMARKLET__">🧁 웹리스 백업 풀기</a></p>
+  <p class="muted">파이어폭스는 아직 직접 확인하지 못했어요.</p>
 
   <h2>2. 모바일 크롬 — 북마크 주소로 붙여넣기</h2>
+  <p class="muted">안드로이드 크롬 기준이에요(실기기 확인 전). iOS는 확인하지 못했어요. 폰에서 푼 파일을 데스크톱 앱에 넣으려면 PC로 옮겨야 해요.</p>
   <ol>
     <li>아래 <b>코드 복사</b>를 눌러요.</li>
     <li>아무 페이지나 북마크로 저장한 뒤, 북마크 수정에서 이름을 <code>백업풀기</code>로, 주소(URL)를 복사한 코드로 바꿔요.</li>
@@ -56,10 +62,12 @@
   </div>
 
   <h2>3. 탬퍼몽키/바이올런트몽키 — 유저스크립트</h2>
-  <p><code>risu-backup-unlock.user.js</code>를 설치하면 risuai.xyz 왼쪽 아래에 <b>🧁 백업 풀기</b> 버튼이 생겨요.</p>
+  <p><a href="risu-backup-unlock.user.js">risu-backup-unlock.user.js</a>를 열면 탬퍼몽키가 설치 화면을 띄워요.
+    설치하면 risuai.xyz 왼쪽 아래에 <b>🧁 백업 풀기</b> 버튼이 생겨요.</p>
 
   <h2>4. 개발자 도구 콘솔</h2>
-  <p>risuai.xyz 탭에서 F12 → Console에 <code>console.js</code> 내용을 붙여넣고 Enter.</p>
+  <p>risuai.xyz 탭에서 F12 → Console에 <a href="console.js">console.js</a> 내용을 붙여넣고 Enter.
+    크롬이 처음 붙여넣기를 막으면 안내대로 <code>allow pasting</code>을 입력한 뒤 다시 붙여넣어요.</p>
 </main>
 <script>
   document.getElementById('copy').addEventListener('click', async () => {

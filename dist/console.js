@@ -49,13 +49,18 @@ const RisuBackupUnlock = (() => {
       `백업 파일이 ${offset} 바이트 지점에서 끊겨 있어요. 다운로드가 끝까지 됐는지 확인해 주세요.`);
   }
 
+  function throwIfCancelled(signal) {
+    if (signal && signal.aborted) throw new UnlockError('CANCELLED', '작업을 취소했어요.');
+  }
+
   // Lists entries by reading headers only; entry data is never loaded here, so a multi-GB
   // backup costs one small read per entry.
-  async function scanEntries(blob, onProgress) {
+  async function scanEntries(blob, onProgress, signal) {
     const decoder = new TextDecoder();
     const entries = [];
     let offset = 0;
     while (offset < blob.size) {
+      throwIfCancelled(signal);
       if (offset + LENGTH_BYTES > blob.size) throw truncated(offset);
       let header = await readBytes(blob, offset, Math.min(blob.size, offset + HEADER_WINDOW_BYTES));
       const nameLength = readU32(header, 0);
@@ -160,7 +165,9 @@ const RisuBackupUnlock = (() => {
    * Turns an encrypted risuai.xyz full backup into a plain one.
    * @param {Blob} blob the original `.bin` backup (a File works)
    * @param {{fetchImpl?: Function, subtle?: SubtleCrypto, onScanProgress?: Function,
-   *   onPhase?: (phase: 'scan'|'key'|'decrypt'|'verify') => void}} [options]
+   *   onPhase?: (phase: 'scan'|'key'|'decrypt'|'verify') => void, signal?: AbortSignal}} [options]
+   *   `signal` stops the work at the next step boundary (a running WebCrypto call cannot be
+   *   interrupted); a cancelled run throws UnlockError CANCELLED and never returns a file.
    * @returns {Promise<{status: 'not-encrypted', entryCount: number} |
    *   {status: 'unlocked', blob: Blob, summary: object}>}
    */
@@ -168,8 +175,9 @@ const RisuBackupUnlock = (() => {
     const fetchImpl = options.fetchImpl || globalThis.fetch.bind(globalThis);
     const subtle = options.subtle || globalThis.crypto.subtle;
     const phase = options.onPhase || (() => {});
+    const { signal } = options;
     phase('scan');
-    const entries = await scanEntries(blob, options.onScanProgress);
+    const entries = await scanEntries(blob, options.onScanProgress, signal);
     const encryptionEntries = entries.filter((entry) => entry.name === ENCRYPTION_ENTRY);
     const databaseEntries = entries.filter((entry) => entry.name === DATABASE_ENTRY);
     if (databaseEntries.length === 0) {
@@ -184,10 +192,13 @@ const RisuBackupUnlock = (() => {
     const encryption = encryptionEntries[0];
     const database = databaseEntries[0];
     const meta = parseEncryptionMeta(await readBytes(blob, encryption.dataStart, encryption.end));
+    throwIfCancelled(signal);
     phase('key');
     const key = await fetchKey(meta.time, fetchImpl);
+    throwIfCancelled(signal);
     phase('decrypt');
     const plain = await decryptDatabase(await readBytes(blob, database.dataStart, database.end), key, subtle);
+    throwIfCancelled(signal);
 
     // Reuse the original header bytes (exact name encoding) with the plaintext length patched in.
     const databaseHeader = await readBytes(blob, database.start, database.dataStart);
@@ -222,6 +233,7 @@ const RisuBackupUnlock = (() => {
     const output = new Blob(parts, { type: 'application/octet-stream' });
     phase('verify');
     await verifyOutput(output, expected);
+    throwIfCancelled(signal);
     return {
       status: 'unlocked',
       blob: output,
@@ -308,7 +320,13 @@ function rbuFormatBytes(bytes) {
 }
 
 function openUnlockPanel() {
-  document.getElementById(RBU_PANEL_ID)?.remove();
+  // A panel owns its object URL and in-flight run; replacing it must release both, not just
+  // detach the element (an older build without the hook is simply removed).
+  const previous = document.getElementById(RBU_PANEL_ID);
+  if (previous) {
+    if (typeof previous.rbuDispose === 'function') previous.rbuDispose();
+    else previous.remove();
+  }
   const host = document.createElement('div');
   host.id = RBU_PANEL_ID;
   const root = host.attachShadow({ mode: 'open' });
@@ -329,7 +347,8 @@ function openUnlockPanel() {
         <button class="save" type="button" hidden>⬇ 풀린 백업 저장하기</button>
       </div>
       <div class="status" role="status" aria-live="polite"></div>
-      <p class="note">원본 파일은 바뀌지 않아요. 파일 내용은 이 브라우저 밖으로 나가지 않고,
+      <p class="note">원본 파일은 바뀌지 않아요. 단, 결과 파일은 원본을 이어 붙여 만들기 때문에
+        저장이 끝날 때까지 원본을 옮기거나 지우지 마세요. 파일 내용은 이 브라우저 밖으로 나가지 않고,
         키 서버에는 리스와 똑같이 백업 시각만 보내요.</p>
     </div>`;
   document.body.appendChild(host);
@@ -340,6 +359,9 @@ function openUnlockPanel() {
   const status = root.querySelector('.status');
   let objectUrl = null;
   let outputName = '';
+  // AbortController of the in-flight run, if any.
+  let running = null;
+  let disposed = false;
 
   const setStatus = (text, tone = '') => {
     status.textContent = text;
@@ -350,11 +372,16 @@ function openUnlockPanel() {
     objectUrl = null;
     save.hidden = true;
   };
-
-  root.querySelector('.close').addEventListener('click', () => {
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    if (running) running.abort();
     releaseOutput();
     host.remove();
-  });
+  };
+  host.rbuDispose = dispose;
+
+  root.querySelector('.close').addEventListener('click', dispose);
   pick.addEventListener('click', () => input.click());
   save.addEventListener('click', () => {
     if (!objectUrl) return;
@@ -372,9 +399,12 @@ function openUnlockPanel() {
     if (!file) return;
     releaseOutput();
     pick.disabled = true;
+    const run = new AbortController();
+    running = run;
     let lastProgressAt = 0;
     try {
       const result = await RisuBackupUnlock.unlockBackup(file, {
+        signal: run.signal,
         onPhase: (phase) => setStatus(`${file.name} (${rbuFormatBytes(file.size)})\n${RBU_PHASE_TEXT[phase]}`),
         onScanProgress: (done, total, count) => {
           const now = Date.now();
@@ -383,6 +413,8 @@ function openUnlockPanel() {
           setStatus(`${file.name}\n${RBU_PHASE_TEXT.scan} ${Math.floor((done / total) * 100)}% (${count}개 항목)`);
         },
       });
+      // Closed or replaced while the last step ran: drop the result instead of minting a URL.
+      if (run.signal.aborted) return;
       if (result.status === 'not-encrypted') {
         setStatus(`이 백업은 암호화되어 있지 않아요 (${result.entryCount}개 항목).\n그대로 다른 리스에서 불러오면 돼요.`, 'ok');
         return;
@@ -398,11 +430,13 @@ function openUnlockPanel() {
         '"풀린 백업 저장하기"를 눌러 저장한 뒤, 옮길 리스의 설정 → 계정 & 파일 → "로컬 백업 불러오기"로 열어 주세요.',
       ].join('\n'), 'ok');
     } catch (error) {
+      if (run.signal.aborted) return;
       const message = error instanceof RisuBackupUnlock.UnlockError
         ? error.message
         : `예상하지 못한 오류가 났어요: ${error && error.message ? error.message : error}`;
       setStatus(`❌ ${message}`, 'error');
     } finally {
+      if (running === run) running = null;
       pick.disabled = false;
     }
   });

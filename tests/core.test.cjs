@@ -35,14 +35,17 @@ function meta(time = KEY_TIME) {
 const PLAIN_DB = Buffer.concat([Buffer.from('RISUSAVE\0', 'latin1'), nodeCrypto.randomBytes(5000)]);
 const ASSET_A = nodeCrypto.randomBytes(3000);
 const ASSET_B = nodeCrypto.randomBytes(10);
-const COLD = Buffer.from(JSON.stringify({ type: 'coldstorage', chats: [1, 2, 3] }));
+// Named and shaped like a stock cold-storage entry (UUID name, {message} payload). The tool
+// treats every non-reserved entry as opaque bytes, so this checks it is not special-cased.
+const COLD_NAME = 'coldstorage_3f2a9c4e-1b7d-4e8a-9c0f-5d6e7f8a9b0c.json';
+const COLD = Buffer.from(JSON.stringify({ message: [{ role: 'char', data: 'archived chat' }] }));
 
 function webBackup(order = 'stock') {
   const parts = {
     a: entry('0123abcd.png', ASSET_A),
     b: entry('에셋 이름.webp', ASSET_B),
     empty: entry('empty.bin', Buffer.alloc(0)),
-    cold: entry('coldstorage_x.json', COLD),
+    cold: entry(COLD_NAME, COLD),
     enc: entry('encryption.risudat', meta()),
     db: entry('database.risudat', webRisuEncrypt(PLAIN_DB)),
   };
@@ -104,7 +107,7 @@ test('unlocks a web backup into one the stock loader reads as plain', async () =
   assert.equal(view.encryptionMeta.type, 'none', 'no encryption entry may remain');
   assert.equal(view.leftover, 0);
   assert.ok(Buffer.from(view.pendingDatabase).equals(PLAIN_DB), 'database must be the exact plaintext');
-  assert.deepEqual(view.seen.map(([name]) => name), ['0123abcd.png', '에셋 이름.webp', 'empty.bin', 'coldstorage_x.json']);
+  assert.deepEqual(view.seen.map(([name]) => name), ['0123abcd.png', '에셋 이름.webp', 'empty.bin', COLD_NAME]);
   assert.ok(view.seen[0][1].equals(ASSET_A));
   assert.ok(view.seen[1][1].equals(ASSET_B));
   assert.equal(view.seen[2][1].length, 0);
@@ -120,7 +123,10 @@ test('entry order does not matter (metadata after the database, database mid-fil
   const view = await stockLoaderView(result.blob);
   assert.equal(view.encryptionMeta.type, 'none');
   assert.ok(Buffer.from(view.pendingDatabase).equals(PLAIN_DB));
-  assert.deepEqual(view.seen.map(([name]) => name), ['0123abcd.png', '에셋 이름.webp', 'empty.bin', 'coldstorage_x.json']);
+  assert.deepEqual(view.seen.map(([name]) => name), ['0123abcd.png', '에셋 이름.webp', 'empty.bin', COLD_NAME]);
+  assert.ok(view.seen[0][1].equals(ASSET_A));
+  assert.ok(view.seen[1][1].equals(ASSET_B));
+  assert.ok(view.seen[3][1].equals(COLD));
 });
 
 test('a plain backup is reported as not encrypted and the key server is never asked', async () => {
@@ -159,6 +165,24 @@ test('network failure and bad key responses are typed errors', async () => {
   );
   await assert.rejects(core.unlockBackup(webBackup(), { fetchImpl: keyServer('').fetchImpl }), { code: 'KEY_BAD' });
   await assert.rejects(core.unlockBackup(webBackup(), { fetchImpl: keyServer(KEY_STRING, 500).fetchImpl }), { code: 'KEY_HTTP' });
+  const notJson = async () => ({ status: 200, ok: true, json: async () => { throw new SyntaxError('Unexpected token <'); } });
+  await assert.rejects(core.unlockBackup(webBackup(), { fetchImpl: notJson }), { code: 'KEY_BAD' });
+});
+
+test('a cancelled run stops at the next step and never returns a file', async () => {
+  const early = new AbortController();
+  early.abort();
+  const server = keyServer();
+  await assert.rejects(core.unlockBackup(webBackup(), { fetchImpl: server.fetchImpl, signal: early.signal }), { code: 'CANCELLED' });
+  assert.equal(server.calls.length, 0, 'aborted before scanning: the key server is never asked');
+
+  // Closing the panel while the key request is in flight.
+  const late = new AbortController();
+  const abortingServer = async (url) => {
+    late.abort();
+    return keyServer().fetchImpl(url);
+  };
+  await assert.rejects(core.unlockBackup(webBackup(), { fetchImpl: abortingServer, signal: late.signal }), { code: 'CANCELLED' });
 });
 
 test('truncated files are refused, whether cut in data or in a header', async () => {

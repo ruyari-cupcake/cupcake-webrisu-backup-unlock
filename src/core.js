@@ -48,13 +48,18 @@ const RisuBackupUnlock = (() => {
       `백업 파일이 ${offset} 바이트 지점에서 끊겨 있어요. 다운로드가 끝까지 됐는지 확인해 주세요.`);
   }
 
+  function throwIfCancelled(signal) {
+    if (signal && signal.aborted) throw new UnlockError('CANCELLED', '작업을 취소했어요.');
+  }
+
   // Lists entries by reading headers only; entry data is never loaded here, so a multi-GB
   // backup costs one small read per entry.
-  async function scanEntries(blob, onProgress) {
+  async function scanEntries(blob, onProgress, signal) {
     const decoder = new TextDecoder();
     const entries = [];
     let offset = 0;
     while (offset < blob.size) {
+      throwIfCancelled(signal);
       if (offset + LENGTH_BYTES > blob.size) throw truncated(offset);
       let header = await readBytes(blob, offset, Math.min(blob.size, offset + HEADER_WINDOW_BYTES));
       const nameLength = readU32(header, 0);
@@ -159,7 +164,9 @@ const RisuBackupUnlock = (() => {
    * Turns an encrypted risuai.xyz full backup into a plain one.
    * @param {Blob} blob the original `.bin` backup (a File works)
    * @param {{fetchImpl?: Function, subtle?: SubtleCrypto, onScanProgress?: Function,
-   *   onPhase?: (phase: 'scan'|'key'|'decrypt'|'verify') => void}} [options]
+   *   onPhase?: (phase: 'scan'|'key'|'decrypt'|'verify') => void, signal?: AbortSignal}} [options]
+   *   `signal` stops the work at the next step boundary (a running WebCrypto call cannot be
+   *   interrupted); a cancelled run throws UnlockError CANCELLED and never returns a file.
    * @returns {Promise<{status: 'not-encrypted', entryCount: number} |
    *   {status: 'unlocked', blob: Blob, summary: object}>}
    */
@@ -167,8 +174,9 @@ const RisuBackupUnlock = (() => {
     const fetchImpl = options.fetchImpl || globalThis.fetch.bind(globalThis);
     const subtle = options.subtle || globalThis.crypto.subtle;
     const phase = options.onPhase || (() => {});
+    const { signal } = options;
     phase('scan');
-    const entries = await scanEntries(blob, options.onScanProgress);
+    const entries = await scanEntries(blob, options.onScanProgress, signal);
     const encryptionEntries = entries.filter((entry) => entry.name === ENCRYPTION_ENTRY);
     const databaseEntries = entries.filter((entry) => entry.name === DATABASE_ENTRY);
     if (databaseEntries.length === 0) {
@@ -183,10 +191,13 @@ const RisuBackupUnlock = (() => {
     const encryption = encryptionEntries[0];
     const database = databaseEntries[0];
     const meta = parseEncryptionMeta(await readBytes(blob, encryption.dataStart, encryption.end));
+    throwIfCancelled(signal);
     phase('key');
     const key = await fetchKey(meta.time, fetchImpl);
+    throwIfCancelled(signal);
     phase('decrypt');
     const plain = await decryptDatabase(await readBytes(blob, database.dataStart, database.end), key, subtle);
+    throwIfCancelled(signal);
 
     // Reuse the original header bytes (exact name encoding) with the plaintext length patched in.
     const databaseHeader = await readBytes(blob, database.start, database.dataStart);
@@ -221,6 +232,7 @@ const RisuBackupUnlock = (() => {
     const output = new Blob(parts, { type: 'application/octet-stream' });
     phase('verify');
     await verifyOutput(output, expected);
+    throwIfCancelled(signal);
     return {
       status: 'unlocked',
       blob: output,

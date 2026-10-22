@@ -53,7 +53,13 @@ function rbuFormatBytes(bytes) {
 }
 
 function openUnlockPanel() {
-  document.getElementById(RBU_PANEL_ID)?.remove();
+  // A panel owns its object URL and in-flight run; replacing it must release both, not just
+  // detach the element (an older build without the hook is simply removed).
+  const previous = document.getElementById(RBU_PANEL_ID);
+  if (previous) {
+    if (typeof previous.rbuDispose === 'function') previous.rbuDispose();
+    else previous.remove();
+  }
   const host = document.createElement('div');
   host.id = RBU_PANEL_ID;
   const root = host.attachShadow({ mode: 'open' });
@@ -74,7 +80,8 @@ function openUnlockPanel() {
         <button class="save" type="button" hidden>⬇ 풀린 백업 저장하기</button>
       </div>
       <div class="status" role="status" aria-live="polite"></div>
-      <p class="note">원본 파일은 바뀌지 않아요. 파일 내용은 이 브라우저 밖으로 나가지 않고,
+      <p class="note">원본 파일은 바뀌지 않아요. 단, 결과 파일은 원본을 이어 붙여 만들기 때문에
+        저장이 끝날 때까지 원본을 옮기거나 지우지 마세요. 파일 내용은 이 브라우저 밖으로 나가지 않고,
         키 서버에는 리스와 똑같이 백업 시각만 보내요.</p>
     </div>`;
   document.body.appendChild(host);
@@ -85,6 +92,9 @@ function openUnlockPanel() {
   const status = root.querySelector('.status');
   let objectUrl = null;
   let outputName = '';
+  // AbortController of the in-flight run, if any.
+  let running = null;
+  let disposed = false;
 
   const setStatus = (text, tone = '') => {
     status.textContent = text;
@@ -95,11 +105,16 @@ function openUnlockPanel() {
     objectUrl = null;
     save.hidden = true;
   };
-
-  root.querySelector('.close').addEventListener('click', () => {
+  const dispose = () => {
+    if (disposed) return;
+    disposed = true;
+    if (running) running.abort();
     releaseOutput();
     host.remove();
-  });
+  };
+  host.rbuDispose = dispose;
+
+  root.querySelector('.close').addEventListener('click', dispose);
   pick.addEventListener('click', () => input.click());
   save.addEventListener('click', () => {
     if (!objectUrl) return;
@@ -117,9 +132,12 @@ function openUnlockPanel() {
     if (!file) return;
     releaseOutput();
     pick.disabled = true;
+    const run = new AbortController();
+    running = run;
     let lastProgressAt = 0;
     try {
       const result = await RisuBackupUnlock.unlockBackup(file, {
+        signal: run.signal,
         onPhase: (phase) => setStatus(`${file.name} (${rbuFormatBytes(file.size)})\n${RBU_PHASE_TEXT[phase]}`),
         onScanProgress: (done, total, count) => {
           const now = Date.now();
@@ -128,6 +146,8 @@ function openUnlockPanel() {
           setStatus(`${file.name}\n${RBU_PHASE_TEXT.scan} ${Math.floor((done / total) * 100)}% (${count}개 항목)`);
         },
       });
+      // Closed or replaced while the last step ran: drop the result instead of minting a URL.
+      if (run.signal.aborted) return;
       if (result.status === 'not-encrypted') {
         setStatus(`이 백업은 암호화되어 있지 않아요 (${result.entryCount}개 항목).\n그대로 다른 리스에서 불러오면 돼요.`, 'ok');
         return;
@@ -143,11 +163,13 @@ function openUnlockPanel() {
         '"풀린 백업 저장하기"를 눌러 저장한 뒤, 옮길 리스의 설정 → 계정 & 파일 → "로컬 백업 불러오기"로 열어 주세요.',
       ].join('\n'), 'ok');
     } catch (error) {
+      if (run.signal.aborted) return;
       const message = error instanceof RisuBackupUnlock.UnlockError
         ? error.message
         : `예상하지 못한 오류가 났어요: ${error && error.message ? error.message : error}`;
       setStatus(`❌ ${message}`, 'error');
     } finally {
+      if (running === run) running = null;
       pick.disabled = false;
     }
   });
