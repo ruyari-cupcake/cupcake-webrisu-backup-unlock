@@ -18,6 +18,10 @@ screenshots, result JSON) lands in `work/`, which is git-ignored and deleted aft
 3. `bash run-e2e.sh` — bookmarklet and userscript forms on risuai.xyz (identical output), the
    already-plain path, then the control (original file into stock Risu must fail) and the unlocked
    file into stock Risu (character, first message and 20 assets must be present).
-   `MOBILE=1 PROFILE=web-mobile node drive.mjs web unlock` checks the phone-sized panel.
+   `MOBILE=1 PROFILE=web-mobile node drive.mjs web unlock` checks the phone-sized panel;
+   `FORM=jsurl node drive.mjs web unlock` navigates to the real `javascript:` URL.
+4. `bash run-scale.sh` — ~1.5 GiB fixture (1 MiB synthetic assets + the real export's entries,
+   so the database stays under a genuine server key), unlocked under a memory/time cap while
+   `rss-sampler.cjs` records the browser's peak RSS; prints entry list and expected vs actual size.
 
 Afterwards: stop the preview server, `rm -rf work ~/vanilla-risu-live`.

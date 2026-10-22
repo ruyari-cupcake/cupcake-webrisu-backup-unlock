@@ -21,7 +21,10 @@ function bundle(entryCall) {
 }
 
 const consoleBundle = bundle('openUnlockPanel();');
-const bookmarklet = `javascript:${encodeURIComponent(consoleBundle)}`;
+// Some bookmark managers flatten the URL to one line; with full-line comments gone (and no
+// trailing ones in src), the body still parses when every newline is lost.
+const bookmarkletBody = consoleBundle.split('\n').filter((line) => !/^\s*\/\//.test(line)).join('\n');
+const bookmarklet = `javascript:${encodeURIComponent(bookmarkletBody)}`;
 const userscript = `// ==UserScript==
 // @name         🧁 웹리스 백업 풀기
 // @namespace    cupcake.risu-backup-unlock
