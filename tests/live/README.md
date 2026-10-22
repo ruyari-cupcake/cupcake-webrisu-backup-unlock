@@ -2,6 +2,8 @@
 
 Proves the built `dist/` tool on the real venues. Everything stateful (browser profiles, backups,
 fixtures, screenshots, result JSON) lands in `work/`, which is git-ignored and deleted after a run.
+Needs Playwright with Chromium: `PLAYWRIGHT_MODULE=/path/to/node_modules/playwright`, or
+`npm i -D playwright && npx playwright install chromium` in the repo.
 
 1. Stock RisuAI from GitHub (the authority), served on a non-risuai origin:
    ```bash

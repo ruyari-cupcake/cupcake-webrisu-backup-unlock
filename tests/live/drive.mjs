@@ -1,12 +1,10 @@
 // Live E2E driver: real risuai.xyz export -> unlock tool on risuai.xyz -> restore into stock Risu.
 // Usage: node drive.mjs <venue: web|stock> <step>   (one persistent profile per venue under work/)
 // Steps live in step-<name>.mjs; artifacts (backups, screenshots, results) go to work/.
-import { createRequire } from 'node:module';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
+import { chromium } from './playwright.mjs';
 
-const require = createRequire(import.meta.url);
-const { chromium } = require('/home/cupcake/workspace/cupcake/Playwright/workspace/node_modules/playwright');
 const LIVE = new URL('.', import.meta.url).pathname;
 const WORK = join(LIVE, 'work');
 const VENUES = { web: 'https://risuai.xyz/', stock: process.env.STOCK_URL || 'http://127.0.0.1:6420/' };

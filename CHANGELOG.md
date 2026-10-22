@@ -2,6 +2,8 @@
 
 ## 0.1.0 — 2026-10-22
 
+- Published as **컵케익 웹리스 백업 풀기** (`cupcake-webrisu-backup-unlock`) under the MIT License,
+  with the install page on GitHub Pages and Tampermonkey update URLs pointing at `dist/`.
 - First version: bookmarklet, userscript and console forms that run on risuai.xyz, fetch the
   backup's key the way RisuAI does, decrypt only `database.risudat`, drop `encryption.risudat`,
   copy every other entry byte-for-byte, and re-check the result before offering the download.

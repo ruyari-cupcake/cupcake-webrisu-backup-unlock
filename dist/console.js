@@ -1,3 +1,4 @@
+/*! 컵케익 웹리스 백업 풀기 v0.1.0 | (c) 2026 Ruyari Cupcake | MIT License | https://github.com/ruyari-cupcake/cupcake-webrisu-backup-unlock */
 (() => {
 // Core of the web-Risu backup unlocker. No DOM access, so the same code runs on risuai.xyz
 // (bookmarklet / userscript / console) and under node:test.
@@ -333,9 +334,9 @@ function openUnlockPanel() {
   const onOfficialSite = /(^|\.)risuai\.xyz$/.test(location.hostname);
   root.innerHTML = `
     <style>${RBU_STYLE}</style>
-    <div class="panel" role="dialog" aria-label="웹리스 백업 풀기">
+    <div class="panel" role="dialog" aria-label="컵케익 웹리스 백업 풀기">
       <div class="head">
-        <h2>🧁 웹리스 백업 풀기 <span class="version">v${RBU_VERSION}</span></h2>
+        <h2>🧁 컵케익 웹리스 백업 풀기 <span class="version">v${RBU_VERSION}</span></h2>
         <button class="close" type="button" aria-label="닫기">✕</button>
       </div>
       <p>risuai.xyz의 <b>설정 → 계정 &amp; 파일 → 로컬 백업 저장</b>으로 받은 전체 백업(.bin)을 골라 주세요.
@@ -458,7 +459,7 @@ function mountUnlockLauncher() {
       }
       button:hover, button:focus-visible { opacity: 1; }
     </style>
-    <button type="button" title="웹리스 백업 풀기">🧁 백업 풀기</button>`;
+    <button type="button" title="컵케익 웹리스 백업 풀기">🧁 백업 풀기</button>`;
   root.querySelector('button').addEventListener('click', openUnlockPanel);
   document.body.appendChild(host);
 }

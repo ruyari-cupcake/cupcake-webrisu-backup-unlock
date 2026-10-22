@@ -1,8 +1,15 @@
 {
-  "name": "risu-backup-unlock",
+  "name": "cupcake-webrisu-backup-unlock",
   "version": "0.1.0",
   "private": true,
-  "description": "Turns an encrypted risuai.xyz full backup into a plain backup any RisuAI can restore.",
+  "description": "컵케익 웹리스 백업 풀기 — turns an encrypted risuai.xyz full backup into a plain backup any RisuAI can restore.",
+  "license": "MIT",
+  "author": "Ruyari Cupcake",
+  "homepage": "https://github.com/ruyari-cupcake/cupcake-webrisu-backup-unlock",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ruyari-cupcake/cupcake-webrisu-backup-unlock.git"
+  },
   "type": "commonjs",
   "scripts": {
     "build": "node scripts/build.cjs",

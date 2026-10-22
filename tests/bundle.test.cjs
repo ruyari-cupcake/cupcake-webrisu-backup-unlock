@@ -19,10 +19,10 @@ test('bookmarklet is a javascript: URL that survives losing every newline', () =
 });
 
 test('every form carries the package version and no unreplaced placeholders', () => {
-  for (const file of ['console.js', 'risu-backup-unlock.user.js', 'install.html']) {
+  for (const file of ['console.js', 'cupcake-webrisu-backup-unlock.user.js', 'install.html']) {
     const text = read(file);
     assert.ok(!/__RBU_[A-Z]+__/.test(text), `${file} has a placeholder left`);
     assert.ok(text.includes(version), `${file} lacks v${version}`);
   }
-  assert.match(read('risu-backup-unlock.user.js'), /^\/\/ ==UserScript==[\s\S]*@match\s+https:\/\/risuai\.xyz\/\*/);
+  assert.match(read('cupcake-webrisu-backup-unlock.user.js'), /^\/\/ ==UserScript==[\s\S]*@match\s+https:\/\/risuai\.xyz\/\*/);
 });

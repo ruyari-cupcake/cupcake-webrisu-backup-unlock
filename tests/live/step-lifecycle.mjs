@@ -22,7 +22,7 @@ export default async function ({ risu, shot, WORK }) {
   });
   const urls = () => risu.evaluate(() => window.__rbuUrls());
   const panelCount = () => risu.evaluate(() => document.querySelectorAll('#cupcake-risu-backup-unlock').length);
-  const panel = () => risu.getByRole('dialog', { name: '웹리스 백업 풀기' });
+  const panel = () => risu.getByRole('dialog', { name: '컵케익 웹리스 백업 풀기' });
   const pickFile = async (file) => {
     const [chooser] = await Promise.all([
       risu.waitForEvent('filechooser', { timeout: 10000 }),

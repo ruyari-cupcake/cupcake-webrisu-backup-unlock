@@ -1,7 +1,9 @@
-# 🧁 웹리스 백업 풀기 (risu-backup-unlock)
+# 🧁 컵케익 웹리스 백업 풀기 (cupcake-webrisu-backup-unlock)
 
 risuai.xyz(웹리스)의 **전체 백업(.bin)** 을 로컬리스(데스크톱 앱)·노드리스·포크 리스에서 불러올 수 있는
 일반 백업으로 바꿔 주는 북마클릿 / 유저스크립트입니다.
+
+**👉 설치 안내: <https://ruyari-cupcake.github.io/cupcake-webrisu-backup-unlock/>**
 
 ## 왜 필요한가
 
@@ -30,13 +32,13 @@ risuai.xyz(웹리스)의 **전체 백업(.bin)** 을 로컬리스(데스크톱 �
 
 ## 사용법
 
-`npm run build` 결과물이 `dist/`에 있습니다. 설치 안내 페이지는 `dist/install.html`입니다.
-**아직 공개 배포(저장소·호스팅 페이지)는 하지 않았습니다.**
+설치 안내 페이지([온라인](https://ruyari-cupcake.github.io/cupcake-webrisu-backup-unlock/), `dist/install.html`)에
+북마클릿 버튼·코드 복사·유저스크립트 링크가 모두 있습니다. 빌드 결과물은 `dist/`에 커밋되어 있습니다.
 
 | 형태 | 파일 | 쓰는 법 |
 |---|---|---|
 | 북마클릿 (PC·모바일) | `dist/bookmarklet.txt` | 북마크 주소로 저장 → risuai.xyz 탭에서 실행 |
-| 유저스크립트 | `dist/risu-backup-unlock.user.js` | 탬퍼몽키 등에 설치 → risuai.xyz 왼쪽 아래 **🧁 백업 풀기** |
+| 유저스크립트 | [`dist/cupcake-webrisu-backup-unlock.user.js`](https://raw.githubusercontent.com/ruyari-cupcake/cupcake-webrisu-backup-unlock/main/dist/cupcake-webrisu-backup-unlock.user.js) | 탬퍼몽키 등에 설치 → risuai.xyz 왼쪽 아래 **🧁 백업 풀기** |
 | 콘솔 | `dist/console.js` | risuai.xyz 탭의 개발자 도구 콘솔에 붙여넣기 |
 
 1. risuai.xyz → **설정 → 계정 & 파일 → 로컬 백업 저장**으로 전체 백업을 받습니다.
@@ -97,5 +99,10 @@ npm run build     # dist/ 생성
 - `src/core.js` — DOM 없는 핵심 로직 (스캔, 키 요청, 해독, 재조립, 검증, 취소). Node 테스트와 브라우저가 같은 코드를 씁니다.
 - `src/ui.js` — risuai.xyz 위에 띄우는 패널 (shadow DOM). 줄 끝 주석 금지: 북마클릿이 줄바꿈을 잃어도 동작해야 합니다 (`tests/bundle.test.cjs`).
 - `tests/core.test.cjs` — 암호화는 `node:crypto`로 따로 만들어 도구의 WebCrypto 경로와 대칭으로 통과하지 않게 했습니다.
-- `tests/live/` — 실제 risuai.xyz 내보내기 → 도구 → 순정 Risu 복원, 패널 수명, 큰 DB·많은 에셋 실측 (`tests/live/README.md`).
+- `tests/live/` — 실제 risuai.xyz 내보내기 → 도구 → 순정 Risu 복원, 패널 수명, 큰 DB·많은 에셋 실측
+  (`tests/live/README.md`; Playwright 필요 — `PLAYWRIGHT_MODULE`로 기존 설치를 가리키거나 `npm i -D playwright`).
 - 리뷰 기록 → `.report/acceptance-2026-10-22.md`.
+
+## 라이선스
+
+[MIT](LICENSE) © 2026 Ruyari Cupcake

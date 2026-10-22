@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>웹리스 백업 풀기</title>
+<title>컵케익 웹리스 백업 풀기</title>
 <style>
   :root { --bg: #fffaf3; --fg: #3b2a1f; --muted: #7a5f4b; --line: #e8cfb4; --accent: #c8763b; --code: #f5e3cf; }
   @media (prefers-color-scheme: dark) {
@@ -28,7 +28,7 @@
 </head>
 <body>
 <main>
-  <h1>🧁 웹리스 백업 풀기 <span class="muted">v__RBU_VERSION__</span></h1>
+  <h1>🧁 컵케익 웹리스 백업 풀기 <span class="muted">v__RBU_VERSION__</span></h1>
   <p>risuai.xyz(웹리스)의 <b>설정 → 계정 &amp; 파일 → 로컬 백업 저장</b>으로 받은 <b>전체 백업(.bin)</b>은
     (로그인 상태면 6월부터, v2026.10.210부터는 항상) 암호화돼서,
     로컬리스·노드리스·포크 리스에서 불러오지 못해요. 이 도구는 <b>risuai.xyz 페이지 안에서</b> 그 백업의 키를 받아
@@ -62,12 +62,14 @@
   </div>
 
   <h2>3. 탬퍼몽키/바이올런트몽키 — 유저스크립트</h2>
-  <p><a href="risu-backup-unlock.user.js">risu-backup-unlock.user.js</a>를 열면 탬퍼몽키가 설치 화면을 띄워요.
+  <p><a href="cupcake-webrisu-backup-unlock.user.js">cupcake-webrisu-backup-unlock.user.js</a>를 열면 탬퍼몽키가 설치 화면을 띄워요.
     설치하면 risuai.xyz 왼쪽 아래에 <b>🧁 백업 풀기</b> 버튼이 생겨요.</p>
 
   <h2>4. 개발자 도구 콘솔</h2>
   <p>risuai.xyz 탭에서 F12 → Console에 <a href="console.js">console.js</a> 내용을 붙여넣고 Enter.
     크롬이 처음 붙여넣기를 막으면 안내대로 <code>allow pasting</code>을 입력한 뒤 다시 붙여넣어요.</p>
+
+  <p class="muted">소스 코드·검증 기록: <a href="__RBU_REPO_URL__">__RBU_REPO_URL__</a> · MIT License · Ruyari Cupcake</p>
 </main>
 <script>
   document.getElementById('copy').addEventListener('click', async () => {

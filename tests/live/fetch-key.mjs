@@ -1,11 +1,9 @@
 // Fetch the genuine backup key for a chosen timestamp from a page on risuai.xyz (the same
 // request stock Risu makes during export), so a large synthetic DB can be encrypted exactly
 // as risuai.xyz would. Usage: node fetch-key.mjs <out.json>
-import { createRequire } from 'node:module';
 import { writeFile } from 'node:fs/promises';
+import { chromium } from './playwright.mjs';
 
-const require = createRequire(import.meta.url);
-const { chromium } = require('/home/cupcake/workspace/cupcake/Playwright/workspace/node_modules/playwright');
 const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage();
