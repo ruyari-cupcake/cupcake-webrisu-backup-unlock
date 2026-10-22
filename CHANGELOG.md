@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 — 2026-10-22
+
+- **Loader bookmarklet** (`dist/loader-bookmarklet.txt`, 251 chars, ASCII only, no whitespace,
+  `%`, `+` or `#`): loads the hosted `dist/console.js` and shows an alert if it cannot. The install
+  page now gives phones this one instead of the ~32 KB inline bookmarklet, which a phone user hit
+  as `SyntaxError: missing ) after argument list` on risuai.xyz. The inline one stays for PC.
+- No change to unlocking itself (`src/core.js`, `src/ui.js` untouched).
+
 ## 0.1.0 — 2026-10-22
 
 - Published as **컵케익 웹리스 백업 풀기** (`cupcake-webrisu-backup-unlock`) under the MIT License,

@@ -34,7 +34,11 @@ Needs Playwright with Chromium: `PLAYWRIGHT_MODULE=/path/to/node_modules/playwri
 
 `bash run-all.sh` runs build, unit + mutation and steps 3–5 in that order.
 
-6. After pushing a release: `PROFILE=web-hosted node drive.mjs web hosted` takes the bookmarklet
+6. Loader bookmarklet: `LOCAL_CONSOLE=1 node drive.mjs web loader` (serves the hosted
+   `console.js` URL from this checkout — use before a release), the same with `MOBILE=1`, and
+   `FAIL_LOAD=1` (bundle unreachable → the loader's alert). Without `LOCAL_CONSOLE` it loads the
+   live GitHub Pages bundle (use after a release).
+7. After pushing a release: `PROFILE=web-hosted node drive.mjs web hosted` takes the bookmarklet
    from the HOSTED install page (GitHub Pages; `HOSTED_URL` overrides) and the userscript from
    its link, unlocks `work/web-backup.bin` with each on risuai.xyz, and requires identical output.
 

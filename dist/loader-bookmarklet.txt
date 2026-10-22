@@ -1,0 +1,1 @@
+javascript:void(document.head.appendChild(Object.assign(document.createElement('script'),{src:'https://ruyari-cupcake.github.io/cupcake-webrisu-backup-unlock/dist/console.js',onerror:function(){alert('Cupcake-backup-unlock:load-failed(network?)')}})))

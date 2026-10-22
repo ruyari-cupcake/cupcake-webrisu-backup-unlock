@@ -49,17 +49,20 @@
   <p><a class="bookmarklet" href="__RBU_BOOKMARKLET__">🧁 웹리스 백업 풀기</a></p>
   <p class="muted">엣지·파이어폭스는 아직 직접 확인하지 못했어요.</p>
 
-  <h2>2. 모바일 크롬 — 북마크 주소로 붙여넣기</h2>
-  <p class="muted">안드로이드 크롬 기준이에요(실기기 확인 전). iOS는 확인하지 못했어요. 폰에서 푼 파일을 데스크톱 앱에 넣으려면 PC로 옮겨야 해요.</p>
+  <h2>2. 모바일 크롬 — 짧은 로더 북마클릿</h2>
+  <p>폰에서는 위의 긴 코드가 붙여넣는 중에 잘려서 <code>SyntaxError</code>가 날 수 있어요. 그래서 폰에는 <b>짧은 로더</b>를 써요.
+    로더는 실행할 때 이 사이트에서 최신 도구를 불러와요(인터넷 연결 필요, PC에서도 똑같이 동작해요).</p>
+  <p class="muted">안드로이드 크롬 기준이에요. iOS는 확인하지 못했어요. 폰에서 푼 파일을 데스크톱 앱에 넣으려면 PC로 옮겨야 해요.</p>
   <ol>
     <li>아래 <b>코드 복사</b>를 눌러요.</li>
     <li>아무 페이지나 북마크로 저장한 뒤, 북마크 수정에서 이름을 <code>백업풀기</code>로, 주소(URL)를 복사한 코드로 바꿔요.</li>
     <li>risuai.xyz 탭의 주소창에 <code>백업풀기</code>를 입력하고, 목록에 뜬 북마크(별 모양)를 눌러요.</li>
   </ol>
   <div class="box">
-    <textarea id="code" readonly>__RBU_BOOKMARKLET__</textarea>
+    <textarea id="code" readonly>__RBU_LOADER__</textarea>
     <p><button type="button" id="copy">코드 복사</button> <span id="copied" class="muted"></span></p>
   </div>
+  <p class="muted">인터넷 없이 동작하는 긴 버전이 필요하면 <a href="bookmarklet.txt">bookmarklet.txt</a>(약 32 KB)를 쓰면 돼요.</p>
 
   <h2>3. 탬퍼몽키/바이올런트몽키 — 유저스크립트</h2>
   <p><a href="cupcake-webrisu-backup-unlock.user.js">cupcake-webrisu-backup-unlock.user.js</a>를 열면 탬퍼몽키가 설치 화면을 띄워요.

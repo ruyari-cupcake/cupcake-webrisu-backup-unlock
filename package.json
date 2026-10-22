@@ -1,6 +1,6 @@
 {
   "name": "cupcake-webrisu-backup-unlock",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "컵케익 웹리스 백업 풀기 — turns an encrypted risuai.xyz full backup into a plain backup any RisuAI can restore.",
   "license": "MIT",

@@ -37,7 +37,8 @@ risuai.xyz(웹리스)의 **전체 백업(.bin)** 을 로컬리스(데스크톱 �
 
 | 형태 | 파일 | 쓰는 법 |
 |---|---|---|
-| 북마클릿 (PC·모바일) | `dist/bookmarklet.txt` | 북마크 주소로 저장 → risuai.xyz 탭에서 실행 |
+| **로더 북마클릿 (모바일 권장, PC도 가능)** | `dist/loader-bookmarklet.txt` (251자) | 북마크 주소로 저장 → risuai.xyz 탭에서 실행. 실행할 때 GitHub Pages의 `dist/console.js`를 불러옴 (인터넷 필요, 항상 최신) |
+| 전체 북마클릿 (PC) | `dist/bookmarklet.txt` (약 32 KB) | 북마크바로 끌어다 놓기 → risuai.xyz 탭에서 실행. 도구 전체가 들어 있어 외부에서 아무것도 불러오지 않음. 폰에서는 붙여넣다 잘려 `SyntaxError`가 날 수 있음 |
 | 유저스크립트 | [`dist/cupcake-webrisu-backup-unlock.user.js`](https://raw.githubusercontent.com/ruyari-cupcake/cupcake-webrisu-backup-unlock/main/dist/cupcake-webrisu-backup-unlock.user.js) | 탬퍼몽키 등에 설치 → risuai.xyz 왼쪽 아래 **🧁 백업 풀기** |
 | 콘솔 | `dist/console.js` | risuai.xyz 탭의 개발자 도구 콘솔에 붙여넣기 |
 

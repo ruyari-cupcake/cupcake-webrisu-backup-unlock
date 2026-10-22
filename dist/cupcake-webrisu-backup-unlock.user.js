@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         🧁 컵케익 웹리스 백업 풀기
 // @namespace    https://github.com/ruyari-cupcake/cupcake-webrisu-backup-unlock
-// @version      0.1.0
+// @version      0.2.0
 // @description  risuai.xyz 전체 백업의 암호화를 풀어 로컬리스·노드리스·포크 리스에서 불러올 수 있게 바꿉니다.
 // @author       Ruyari Cupcake
 // @license      MIT
@@ -12,7 +12,7 @@
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
-/*! 컵케익 웹리스 백업 풀기 v0.1.0 | (c) 2026 Ruyari Cupcake | MIT License | https://github.com/ruyari-cupcake/cupcake-webrisu-backup-unlock */
+/*! 컵케익 웹리스 백업 풀기 v0.2.0 | (c) 2026 Ruyari Cupcake | MIT License | https://github.com/ruyari-cupcake/cupcake-webrisu-backup-unlock */
 (() => {
 // Core of the web-Risu backup unlocker. No DOM access, so the same code runs on risuai.xyz
 // (bookmarklet / userscript / console) and under node:test.
@@ -283,7 +283,7 @@ const RisuBackupUnlock = (() => {
 // On-page panel for the unlocker. Concatenated after core.js by scripts/build.cjs, so
 // `RisuBackupUnlock` is in scope. Everything renders inside a shadow root so risuai.xyz styles
 // cannot leak in, and running the bookmarklet again replaces the previous panel.
-const RBU_VERSION = '0.1.0';
+const RBU_VERSION = '0.2.0';
 const RBU_PANEL_ID = 'cupcake-risu-backup-unlock';
 const RBU_LAUNCHER_ID = 'cupcake-risu-backup-unlock-launcher';
 const RBU_PROGRESS_INTERVAL_MS = 200;

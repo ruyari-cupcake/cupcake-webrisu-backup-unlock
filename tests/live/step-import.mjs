@@ -8,7 +8,9 @@ export default async function ({ risu, shot, WORK }) {
   await risu.waitForTimeout(1500);
   console.log('after plus:', JSON.stringify((await visibleButtons(risu)).slice(0, 15)));
   await shot(risu, 'import-1');
-  const importButton = risu.getByRole('button', { name: /import|가져오기|불러오기/i }).first();
+  // Exact label first: hub cards can also contain the word "import".
+  const exact = risu.getByRole('button', { name: /^(Import Character|캐릭터 가져오기|캐릭터 불러오기)$/ });
+  const importButton = (await exact.count()) ? exact.first() : risu.getByRole('button', { name: /import|가져오기|불러오기/i }).first();
   const [chooser] = await Promise.all([
     risu.waitForEvent('filechooser', { timeout: 15000 }),
     importButton.click(),
