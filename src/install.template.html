@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>웹리스 백업 풀기</title>
+<style>
+  :root { --bg: #fffaf3; --fg: #3b2a1f; --muted: #7a5f4b; --line: #e8cfb4; --accent: #c8763b; --code: #f5e3cf; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1f1915; --fg: #f3e6d8; --muted: #c3a88f; --line: #4a3a2e; --accent: #e08a4a; --code: #2c241e; }
+  }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.65 system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 28px 0 8px; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .bookmarklet { display: inline-block; padding: 10px 18px; border-radius: 12px; background: var(--accent);
+    color: #fff; text-decoration: none; font-weight: 600; cursor: grab; }
+  textarea { width: 100%; box-sizing: border-box; height: 96px; font: 12px/1.4 ui-monospace, monospace;
+    background: var(--code); color: var(--fg); border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+  button { font: inherit; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--line);
+    background: var(--code); color: var(--fg); cursor: pointer; }
+  ol { padding-left: 20px; }
+  code { background: var(--code); padding: 1px 5px; border-radius: 4px; }
+  .box { border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; margin-top: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>🧁 웹리스 백업 풀기 <span class="muted">v__RBU_VERSION__</span></h1>
+  <p>risuai.xyz(웹리스)의 <b>설정 → 계정 &amp; 파일 → 로컬 백업 저장</b>으로 받은 <b>전체 백업(.bin)</b>은 v2026.10.210부터 항상 암호화돼서,
+    로컬리스·노드리스·포크 리스에서 불러오지 못해요. 이 도구는 <b>risuai.xyz 페이지 안에서</b> 그 백업의 키를 받아
+    데이터베이스를 풀고, 어느 리스에서나 불러올 수 있는 일반 백업으로 다시 저장해 줘요.</p>
+  <p class="muted">원본 파일은 바뀌지 않아요. 파일 내용은 브라우저 밖으로 나가지 않고, 키 서버에는 리스 자신과 똑같이
+    백업 시각만 보내요. 키 서버는 risuai.xyz에서 온 요청만 받기 때문에 꼭 risuai.xyz 탭에서 실행해야 해요.</p>
+
+  <h2>1. PC (크롬·엣지·파이어폭스) — 북마클릿</h2>
+  <ol>
+    <li>북마크바를 켜고(<code>Ctrl+Shift+B</code>) 아래 버튼을 북마크바로 끌어다 놓아요.</li>
+    <li>risuai.xyz 탭에서 그 북마크를 눌러요. 오른쪽 위에 패널이 떠요.</li>
+    <li><b>백업 파일 고르기</b> → 끝나면 <b>풀린 백업 저장하기</b>.</li>
+    <li>옮길 리스에서 <b>설정 → 계정 &amp; 파일 → 로컬 백업 불러오기</b>로 <code>…-unlocked.bin</code>을 열어요.</li>
+  </ol>
+  <p><a class="bookmarklet" href="__RBU_BOOKMARKLET__">🧁 웹리스 백업 풀기</a></p>
+
+  <h2>2. 모바일 크롬 — 북마크 주소로 붙여넣기</h2>
+  <ol>
+    <li>아래 <b>코드 복사</b>를 눌러요.</li>
+    <li>아무 페이지나 북마크로 저장한 뒤, 북마크 수정에서 이름을 <code>백업풀기</code>로, 주소(URL)를 복사한 코드로 바꿔요.</li>
+    <li>risuai.xyz 탭의 주소창에 <code>백업풀기</code>를 입력하고, 목록에 뜬 북마크(별 모양)를 눌러요.</li>
+  </ol>
+  <div class="box">
+    <textarea id="code" readonly>__RBU_BOOKMARKLET__</textarea>
+    <p><button type="button" id="copy">코드 복사</button> <span id="copied" class="muted"></span></p>
+  </div>
+
+  <h2>3. 탬퍼몽키/바이올런트몽키 — 유저스크립트</h2>
+  <p><code>risu-backup-unlock.user.js</code>를 설치하면 risuai.xyz 왼쪽 아래에 <b>🧁 백업 풀기</b> 버튼이 생겨요.</p>
+
+  <h2>4. 개발자 도구 콘솔</h2>
+  <p>risuai.xyz 탭에서 F12 → Console에 <code>console.js</code> 내용을 붙여넣고 Enter.</p>
+</main>
+<script>
+  document.getElementById('copy').addEventListener('click', async () => {
+    const code = document.getElementById('code');
+    try {
+      await navigator.clipboard.writeText(code.value);
+    } catch {
+      code.select();
+      document.execCommand('copy');
+    }
+    document.getElementById('copied').textContent = '복사했어요!';
+  });
+</script>
+</body>
+</html>
