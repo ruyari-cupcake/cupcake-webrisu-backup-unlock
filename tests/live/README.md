@@ -34,4 +34,8 @@ Needs Playwright with Chromium: `PLAYWRIGHT_MODULE=/path/to/node_modules/playwri
 
 `bash run-all.sh` runs build, unit + mutation and steps 3–5 in that order.
 
+6. After pushing a release: `PROFILE=web-hosted node drive.mjs web hosted` takes the bookmarklet
+   from the HOSTED install page (GitHub Pages; `HOSTED_URL` overrides) and the userscript from
+   its link, unlocks `work/web-backup.bin` with each on risuai.xyz, and requires identical output.
+
 Afterwards: stop the preview server, `rm -rf work ~/vanilla-risu-live`.
