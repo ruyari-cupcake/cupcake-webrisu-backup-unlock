@@ -20,14 +20,16 @@ fixtures, screenshots, result JSON) lands in `work/`, which is git-ignored and d
    fail) and the unlocked file into stock Risu (character, first message and 20 assets present).
    `MOBILE=1 PROFILE=web-mobile node drive.mjs web unlock` checks the phone-sized panel;
    `FORM=jsurl node drive.mjs web unlock` navigates to the real `javascript:` URL.
-4. `PROFILE=web-lifecycle node drive.mjs web lifecycle` — object URLs are revoked on panel
-   replacement/close and a run closed mid-way mints none (needs `work/big.bin` from step 5 for the
-   slow run). `BOOKMARKLET=<file>` runs an older build to show the check going red.
-5. Scale, both under the memory/time cap from `cap.sh` (`CAP_MEMORY`, `CAP_SECONDS`):
+4. Scale, both under the memory/time cap from `cap.sh` (`CAP_MEMORY`, `CAP_SECONDS`):
    - `bash run-scale.sh` — ~1.5 GiB of 1 MiB asset entries + the real export (assets stay lazy
      slices, so this measures scanning/assembly);
    - `DB_MIB=400 bash run-bigdb.sh` — a database of that size encrypted with a genuine key from
      `fetch-key.mjs` (the database is the only part held in memory); compares SHA-256.
    `rss-sampler.cjs` records the browser's peak RSS per process type.
+5. `PROFILE=web-lifecycle node drive.mjs web lifecycle` — object URLs are revoked on panel
+   replacement/close and a run closed mid-way mints none (needs `work/big.bin` from step 4 for the
+   slow run). `BOOKMARKLET=<file>` runs an older build to show the check going red.
+
+`bash run-all.sh` runs build, unit + mutation and steps 3–5 in that order.
 
 Afterwards: stop the preview server, `rm -rf work ~/vanilla-risu-live`.
